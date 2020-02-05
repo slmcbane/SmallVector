@@ -95,6 +95,24 @@ public:
 
     std::size_t size() const noexcept { return m_size; }
 
+    iterator insert(const_iterator pos, const T &value)
+    {
+        if (CHECK_BOUNDS && m_size == MAX_SIZE)
+        {
+            throw MaxSizeExceeded{};
+        }
+
+        auto it = end();
+        while (it != pos)
+        {
+            *it = *(it - 1);
+            it -= 1;
+        }
+        *it = value;
+        m_size += 1;
+        return it;
+    }
+
 private:
     T m_storage [MAX_SIZE];
     std::size_t m_size;
