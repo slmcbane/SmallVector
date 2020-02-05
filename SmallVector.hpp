@@ -61,26 +61,44 @@ public:
 
     iterator erase(const_iterator first, const_iterator last)
     {
+        iterator dst = begin() + (first - begin());
         if (last == end())
         {
             m_size = first - begin();
         }
         else
         {
-            iterator dst = begin() + (first - begin());
-            for (auto src = last; src < end(); ++dst, ++src)
+            for (auto src = last; src != end(); ++dst, ++src)
             {
                 *dst = *src;
             }
             m_size = dst - begin();
+            dst -= 1;
         }
         // This might happen if there is undefined behavior
-        if (m_size > MAX_SIZE)
+        if (CHECK_BOUNDS && (m_size > MAX_SIZE))
         {
             throw MaxSizeExceeded{};
         }
 
-        return end();
+        return dst;
+    }
+
+    iterator erase(const_iterator at)
+    {
+        iterator dst = begin() + (at - begin());
+        for (auto src = at+1; src != end(); ++dst, ++src)
+        {
+            *dst = *src;
+        }
+        m_size -= 1;
+
+        if (CHECK_BOUNDS && (m_size > MAX_SIZE))
+        {
+            throw MaxSizeExceeded{};
+        }
+
+        return begin() + (at - begin());
     }
 
     reference operator[](std::size_t i) noexcept
@@ -111,6 +129,11 @@ public:
         *it = value;
         m_size += 1;
         return it;
+    }
+
+    void empty() noexcept
+    {
+        m_size = 0;
     }
 
 private:
