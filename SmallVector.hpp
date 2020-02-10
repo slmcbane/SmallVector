@@ -25,17 +25,41 @@
 
 #include <cstddef>
 #include <exception>
+#include <utility>
 
 namespace smv
 {
 
 struct MaxSizeExceeded : public std::exception {};
 
+template <class T, class... Args>
+typename std::enable_if<std::is_trivially_destructible<T>::value>::type
+construct_in_place(T* ptr, Args&&... args) noexcept
+{
+    new(ptr) T(std::forward<Args>(args)...);
+}
+
+template <class T, class... Args>
+typename std::enable_if<!std::is_trivially_destructible<T>::value>::type
+construct_in_place(T* ptr, Args&&... args) noexcept
+{
+    ptr->~T();
+    new(ptr) T(std::forward<Args>(args)...);
+}
+
 template <class T, std::size_t MAX_SIZE, bool CHECK_BOUNDS = true>
 class SmallVector
 {
 public:
     SmallVector() : m_size{0} {}
+    
+    typedef T value_type;
+    typedef std::size_t size_type;
+    typedef std::ptrdiff_t difference_type;
+    typedef T& reference;
+    typedef const T& const_reference;
+    typedef T* iterator;
+    typedef const T* const_iterator;
 
     void push_back(T val)
     {
@@ -45,14 +69,16 @@ public:
         }
         m_storage[m_size++] = val;
     }
-    
-    typedef T value_type;
-    typedef std::size_t size_type;
-    typedef std::ptrdiff_t difference_type;
-    typedef T& reference;
-    typedef const T& const_reference;
-    typedef T* iterator;
-    typedef const T* const_iterator;
+
+    template <class... Args>
+    void emplace_back(Args&&... args)
+    {
+        if (CHECK_BOUNDS && m_size == MAX_SIZE)
+        {
+            throw MaxSizeExceeded{};
+        }
+        construct_in_place(m_storage + (m_size++), std::forward<Args>(args)...);
+    }
 
     iterator begin() noexcept { return &m_storage[0]; }
     const_iterator begin() const noexcept { return &m_storage[0]; }
