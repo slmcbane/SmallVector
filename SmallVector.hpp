@@ -157,7 +157,12 @@ public:
         return it;
     }
 
-    void empty() noexcept
+    bool empty() const noexcept
+    {
+        return m_size == 0;
+    }
+
+    void clear() noexcept
     {
         m_size = 0;
     }
