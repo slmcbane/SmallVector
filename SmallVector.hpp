@@ -167,6 +167,19 @@ public:
         m_size = 0;
     }
 
+    value_type *data() noexcept { return &m_storage[0]; }
+    const value_type *data() const noexcept { return &m_storage[0]; }
+
+    void resize(size_type sz)
+    {
+        if (CHECK_BOUNDS && sz > MAX_SIZE)
+        {
+            throw MaxSizeExceeded{};
+        }
+
+        m_size = sz;
+    }
+
 private:
     T m_storage [MAX_SIZE];
     std::size_t m_size;
