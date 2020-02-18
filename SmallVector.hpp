@@ -34,14 +34,17 @@ struct MaxSizeExceeded : public std::exception {};
 
 template <class T, class... Args>
 typename std::enable_if<std::is_trivially_destructible<T>::value>::type
-construct_in_place(T* ptr, Args&&... args) noexcept
+construct_in_place(T* ptr, Args&&... args) noexcept(noexcept(T(std::forward<Args>(args)...)))
 {
     new(ptr) T(std::forward<Args>(args)...);
 }
 
 template <class T, class... Args>
 typename std::enable_if<!std::is_trivially_destructible<T>::value>::type
-construct_in_place(T* ptr, Args&&... args) noexcept
+construct_in_place(T* ptr, Args&&... args)
+    noexcept(std::is_nothrow_destructible<T>::value &&
+             noexcept(T(std::forward<Args>(args)...)))
+             
 {
     ptr->~T();
     new(ptr) T(std::forward<Args>(args)...);
@@ -61,7 +64,8 @@ public:
     typedef T* iterator;
     typedef const T* const_iterator;
 
-    void push_back(T val)
+    void push_back(const T &val)
+        noexcept((!CHECK_BOUNDS) && std::is_nothrow_assignable<T, const T&>::value)
     {
         if (CHECK_BOUNDS && m_size == MAX_SIZE)
         {
@@ -72,6 +76,7 @@ public:
 
     template <class... Args>
     void emplace_back(Args&&... args)
+        noexcept((!CHECK_BOUNDS) && noexcept(construct_in_place(m_storage, std::forward<Args>(args)...)))
     {
         if (CHECK_BOUNDS && m_size == MAX_SIZE)
         {
@@ -85,7 +90,7 @@ public:
     iterator end() noexcept { return (&m_storage[0]) + m_size; }
     const_iterator end() const noexcept { return (&m_storage[0]) + m_size; }
 
-    iterator erase(const_iterator first, const_iterator last)
+    iterator erase(const_iterator first, const_iterator last) noexcept(!CHECK_BOUNDS)
     {
         iterator dst = begin() + (first - begin());
         if (last == end())
@@ -110,7 +115,7 @@ public:
         return dst;
     }
 
-    iterator erase(const_iterator at)
+    iterator erase(const_iterator at) noexcept(!CHECK_BOUNDS)
     {
         iterator dst = begin() + (at - begin());
         for (auto src = at+1; src != end(); ++dst, ++src)
@@ -140,6 +145,7 @@ public:
     std::size_t size() const noexcept { return m_size; }
 
     iterator insert(const_iterator pos, const T &value)
+        noexcept((!CHECK_BOUNDS) && std::is_nothrow_assignable<T, const T&>::value)
     {
         if (CHECK_BOUNDS && m_size == MAX_SIZE)
         {
@@ -170,7 +176,7 @@ public:
     value_type *data() noexcept { return &m_storage[0]; }
     const value_type *data() const noexcept { return &m_storage[0]; }
 
-    void resize(size_type sz)
+    void resize(size_type sz) noexcept(!CHECK_BOUNDS)
     {
         if (CHECK_BOUNDS && sz > MAX_SIZE)
         {
