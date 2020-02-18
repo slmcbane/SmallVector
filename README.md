@@ -16,7 +16,9 @@ size does not exceed `N`. If it is `true` (the default), an exception of type
 Sean McBane (<sean.mcbane@protonmail.com>)
 
 ## Version
-v1.0.0
+v1.0.1
+### Update log
+* 1.0.0 -> 1.0.1 Added smart exception specifications
 
 ## Copyright
 Copyright 2020 The University of Texas at Austin.
