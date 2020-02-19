@@ -76,7 +76,7 @@ public:
 
     template <class... Args>
     void emplace_back(Args&&... args)
-        noexcept((!CHECK_BOUNDS) && noexcept(construct_in_place(m_storage, std::forward<Args>(args)...)))
+        noexcept((!CHECK_BOUNDS) && noexcept(construct_in_place(std::declval<T*>(), std::forward<Args>(args)...)))
     {
         if (CHECK_BOUNDS && m_size == MAX_SIZE)
         {
