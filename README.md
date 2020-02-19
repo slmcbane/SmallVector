@@ -16,8 +16,10 @@ size does not exceed `N`. If it is `true` (the default), an exception of type
 Sean McBane (<sean.mcbane@protonmail.com>)
 
 ## Version
-v1.0.1
+v1.0.2
 ### Update log
+* 1.0.1 -> 1.0.2 Update exception spec on emplace_back; was not compatible
+with gcc
 * 1.0.0 -> 1.0.1 Added smart exception specifications
 
 ## Copyright
