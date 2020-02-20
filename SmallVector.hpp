@@ -101,7 +101,7 @@ public:
         {
             for (auto src = last; src != end(); ++dst, ++src)
             {
-                *dst = *src;
+                *dst = std::move(*src);
             }
             m_size = dst - begin();
             dst -= 1;
@@ -120,7 +120,7 @@ public:
         iterator dst = begin() + (at - begin());
         for (auto src = at+1; src != end(); ++dst, ++src)
         {
-            *dst = *src;
+            *dst = std::move(*src);
         }
         m_size -= 1;
 
