@@ -54,7 +54,7 @@ template <class T, std::size_t MAX_SIZE, bool CHECK_BOUNDS = true>
 class SmallVector
 {
 public:
-    SmallVector() : m_size{0} {}
+    constexpr SmallVector() : m_size{0} {}
     
     typedef T value_type;
     typedef std::size_t size_type;
